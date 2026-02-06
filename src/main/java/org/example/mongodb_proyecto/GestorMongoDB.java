@@ -1,6 +1,7 @@
 package org.example.mongodb_proyecto;
 
 import org.example.mongodb_proyecto.model.Cliente;
+import org.example.mongodb_proyecto.model.Venta;
 import org.example.mongodb_proyecto.model.Videojuego;
 import org.example.mongodb_proyecto.repository.ClienteRepository;
 import org.example.mongodb_proyecto.repository.VentaRepository;
@@ -10,7 +11,9 @@ import org.springframework.stereotype.Service;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Scanner;
 
@@ -124,6 +127,7 @@ public class GestorMongoDB {
             return;
         }
 
+        ventaRepository.save(new Venta(Date.from(Instant.now()), cliente.getId(), videojuego.getId(), videojuego.getTitulo(), videojuego.getPrecio()));
     }
 
     public void esperarUnSegundo() {
