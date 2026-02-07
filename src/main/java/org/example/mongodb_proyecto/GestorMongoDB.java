@@ -40,10 +40,10 @@ public class GestorMongoDB {
 
         SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
         try {
-            collections.getFirst().insertMany(List.of(
-                    new Document("nombre", "Daniel").append("email", "Danielin@gmail.com")
+            collections.get(0).insertMany(List.of(
+                    new Document("nombre", "Daniel").append("email", "danielin@gmail.com")
                             .append("fecha_registro", formatter.parse("11/02/2013")),
-                    new Document("nombre", "Lolo").append("email", "Lolitogoku@gmail.com")
+                    new Document("nombre", "Lolo").append("email", "lolitogoku@gmail.com")
                             .append("fecha_registro", formatter.parse("10/02/2016"))
             ));
         } catch (ParseException e) {
@@ -86,7 +86,7 @@ public class GestorMongoDB {
 
             case 2:
                 if (!doc.getString("email").matches("\\b[a-zA-Z.-_]+@[a-zA-Z.-_]+\\b")) {
-                    System.out.println("El formato del email del cliente es incorrecto, debe ser algo como 'ejemplo@ejemplo");
+                    System.out.println("El formato del email del cliente es incorrecto, debe ser algo como 'ejemplo@ejemplo'");
                     System.out.println("IMPORTANTE PONER LA '@' EN EL EMAIL");
                     esperarUnSegundo();
                     return;
@@ -109,7 +109,7 @@ public class GestorMongoDB {
 
     public void procesarVenta(String emailCliente, String tituloJuego) {
         if (!emailCliente.matches("\\b[a-zA-Z.-_]+@[a-zA-Z.-_]+\\b")) {
-            System.out.println("El formato del email del cliente es incorrecto, debe ser algo como 'ejemplo@ejemplo");
+            System.out.println("El formato del email del cliente es incorrecto, debe ser algo como 'ejemplo@ejemplo'");
             System.out.println("IMPORTANTE PONER LA '@' EN EL EMAIL");
             esperarUnSegundo();
             return;
@@ -121,41 +121,15 @@ public class GestorMongoDB {
             throw new NullPointerException("No existe un cliente con el email: " + emailCliente);
         }
 
-        List<Document> juegos = new ArrayList<>();
+        Document videojuego = collectionVideojuegos.find(eq("titulo", tituloJuego)).first();
+        ;
 
-        collectionVideojuegos.find(eq("titulo", tituloJuego)).forEach(juegos::add);
-
-        Document videojuego = null;
-
-        if (juegos.isEmpty()) {
-            System.out.println("No existen videojuegos con el titulo: " + tituloJuego);
+        if (videojuego.isEmpty()) {
+            System.out.println("No existe el videojuego con el titulo: " + tituloJuego);
             esperarUnSegundo();
             return;
-
-        } else if (juegos.size() > 1) {
-            Scanner sc = new Scanner(System.in);
-
-            System.out.println("Se encontraron varios videojuegos: ");
-
-            for (int i = 0; i < juegos.size(); i++) {
-                System.out.printf("- %d) %s\n", i + 1, juegos.get(i).get("titulo"));
-            }
-
-            System.out.print("Introduzca el numero del juego a seleccionar");
-            int opc = Integer.parseInt(sc.nextLine());
-
-            if (opc > juegos.size()) {
-                System.out.println("No existe ningun juego en el numero: " + opc);
-                esperarUnSegundo();
-                return;
-            }
-
-            videojuego = juegos.get(opc);
-        } else {
-            videojuego = juegos.get(0);
         }
 
-        System.out.println("Juego seleccionado: " + videojuego.get("titulo"));
 
         if (videojuego.getInteger("stock") <= 0) {
             System.out.println("No queda stock de ese juego");
@@ -171,11 +145,12 @@ public class GestorMongoDB {
                 inc("stock", -1));
 
         System.out.println("Venta realizada con exito");
+        esperarUnSegundo();
     }
 
     public void historialCliente(String email) {
         if (!email.matches("\\b[a-zA-Z.-_]+@[a-zA-Z.-_]+\\b")) {
-            System.out.println("El formato del email del cliente es incorrecto, debe ser algo como 'ejemplo@ejemplo");
+            System.out.println("El formato del email del cliente es incorrecto, debe ser algo como 'ejemplo@ejemplo'");
             System.out.println("IMPORTANTE PONER LA '@' EN EL EMAIL");
             esperarUnSegundo();
             return;
@@ -193,12 +168,13 @@ public class GestorMongoDB {
         System.out.println("Ventas en las que aparece el cliente con el email: " + email);
 
         List<Document> ventas = new ArrayList<>();
-        collectionVentas.find(eq("cliente_id", idCliente)).forEach(ventas::add);
+        collectionVentas.find(eq("cliente_id", idCliente))
+                .projection(fields(excludeId())).forEach(ventas::add);
 
         if (ventas.isEmpty()) {
             System.out.println("Este cliente no aparece en ninguna venta");
         } else {
-            ventas.forEach(System.out::println);
+            ventas.forEach(document -> System.out.println(document.toJson()));
         }
     }
 
@@ -206,14 +182,14 @@ public class GestorMongoDB {
         List<Document> ofertas = new ArrayList<>();
 
         collectionVideojuegos.find(lt("precio", 25))
-                .projection(fields(include("titulo", "precio"), exclude()))
+                .projection(fields(include("titulo", "precio"), excludeId()))
                 .forEach(ofertas::add);
 
         if (ofertas.isEmpty()) {
             System.out.println("No hay ofertas actualmente");
-         } else {
+        } else {
             System.out.println("Ofertas Actuales: ");
-            ofertas.forEach(System.out::println);
+            ofertas.forEach(document -> System.out.println(document.toJson()));
         }
     }
 

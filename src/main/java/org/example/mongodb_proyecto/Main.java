@@ -11,7 +11,7 @@ import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) {
-        try (MongoClient mongoClient = MongoClients.create("mongodb://user:userpassword@localhost:27017")) {
+        try (MongoClient mongoClient = MongoClients.create("mongodb://admin:password123@localhost:27017")) {
             MongoDatabase database = mongoClient.getDatabase("tienda_gaming");
             GestorMongoDB gestorMongoDB = new GestorMongoDB(database);
 
@@ -19,7 +19,7 @@ public class Main {
 
             while (true) {
                 System.out.print("""
-                        TIENDA DE JUEGOS EN MONGODB
+                        \nTIENDA DE JUEGOS EN MONGODB
                         - 1) Cargar datos
                         - 2) Dar de alta un cliente o videojuego
                         - 3) Vender un juego a un cliente
@@ -27,7 +27,7 @@ public class Main {
                         - 5) Ver las ofertas de videojuegos que hay
                         - 6) salir
                         
-                        Introduzca el NUMERO de la opcion que desee: """);
+                        Introduzca el NUMERO de la opcion que desee:\s""");
 
                 int opc = Integer.parseInt(sc.nextLine());
 
@@ -41,7 +41,7 @@ public class Main {
                                 - 1) Dar de alta un videojuego
                                 - 2) Dar de alta un cliente
                                 
-                                Introduzca el NUMERO de la opcion que desee: """);
+                                Introduzca el NUMERO de la opcion que desee:\s""");
 
                         opc = Integer.parseInt(sc.nextLine());
 
